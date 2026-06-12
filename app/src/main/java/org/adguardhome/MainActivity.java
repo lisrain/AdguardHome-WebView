@@ -1,6 +1,7 @@
 package org.adguardhome;
 
 import android.app.Activity;
+import android.graphics.Insets;
 import android.graphics.Rect;
 import android.os.Build;
 import android.os.Bundle;
@@ -65,9 +66,9 @@ public class MainActivity extends Activity {
                 controller.setSystemBarsBehavior(WindowInsetsController.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE);
             }
             webView.setOnApplyWindowInsetsListener((v, insets) -> {
-                Rect statusBar = insets.getInsets(WindowInsets.Type.statusBars()).toRect();
-                Rect navBar = insets.getInsets(WindowInsets.Type.navigationBars()).toRect();
-                v.setPadding(0, statusBar.height(), 0, navBar.bottom);
+                Insets statusInsets = insets.getInsets(WindowInsets.Type.statusBars());
+                Insets navInsets = insets.getInsets(WindowInsets.Type.navigationBars());
+                v.setPadding(0, statusInsets.top, 0, navInsets.bottom);
                 return insets;
             });
         } else {
