@@ -1,23 +1,26 @@
 package org.adguardhome;
 
-import android.app.Activity;
-import android.graphics.Insets;
-import android.graphics.Rect;
-import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
-import android.view.Window;
-import android.view.WindowInsets;
-import android.view.WindowInsetsController;
 import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
-public class MainActivity extends Activity {
+import androidx.activity.EdgeToEdge;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.graphics.Insets;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowCompat;
+import androidx.core.view.WindowInsetsCompat;
+import androidx.core.view.WindowInsetsControllerCompat;
+
+public class MainActivity extends AppCompatActivity {
     private static final String TAG = "AdguardHome";
     private WebView webView;
+    private View statusBarPlaceholder;
+
     private static final String TARGET_URL = "http://127.0.0.1:3000";
 
     @Override
@@ -25,11 +28,15 @@ public class MainActivity extends Activity {
         super.onCreate(savedInstanceState);
         Log.d(TAG, "onCreate start");
 
-        webView = new WebView(this);
-        setContentView(webView);
+        EdgeToEdge.enable(this);
+
+        setContentView(R.layout.activity_main);
         Log.d(TAG, "setContentView done");
 
-        setupWindow();
+        statusBarPlaceholder = findViewById(R.id.statusBarPlaceholder);
+        webView = findViewById(R.id.webview);
+
+        setupSystemBars();
 
         WebSettings settings = webView.getSettings();
         settings.setJavaScriptEnabled(true);
@@ -55,48 +62,26 @@ public class MainActivity extends Activity {
         Log.d(TAG, "loadUrl done");
     }
 
-    private void setupWindow() {
-        Log.d(TAG, "setupWindow, SDK=" + Build.VERSION.SDK_INT);
+    private void setupSystemBars() {
+        WindowCompat.setDecorFitsSystemWindows(getWindow(), false);
 
-        getWindow().setStatusBarColor(0xFFF5F5F5);
-        getWindow().setNavigationBarColor(0x00000000);
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
+            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
+            Log.d(TAG, "insets: top=" + systemBars.top + " bottom=" + systemBars.bottom);
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-            Window window = getWindow();
-            WindowInsetsController controller = window.getInsetsController();
-            if (controller != null) {
-                Log.d(TAG, "controller found");
-                controller.setSystemBarsAppearance(
-                    WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS,
-                    WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS
-                );
-                controller.show(WindowInsets.Type.statusBars());
-                controller.setSystemBarsBehavior(WindowInsetsController.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE);
+            if (statusBarPlaceholder != null) {
+                statusBarPlaceholder.getLayoutParams().height = systemBars.top;
+                statusBarPlaceholder.requestLayout();
+                Log.d(TAG, "statusBarPlaceholder height=" + systemBars.top);
             }
-            webView.setOnApplyWindowInsetsListener((v, insets) -> {
-                Insets statusInsets = insets.getInsets(WindowInsets.Type.statusBars());
-                Insets navInsets = insets.getInsets(WindowInsets.Type.navigationBars());
-                Log.d(TAG, "insets: statusBars.top=" + statusInsets.top + " navBars.bottom=" + navInsets.bottom);
-                v.setPadding(0, statusInsets.top, 0, navInsets.bottom);
-                Log.d(TAG, "padding set: top=" + statusInsets.top + " bottom=" + navInsets.bottom);
-                return insets;
-            });
-            webView.requestApplyInsets();
-            Log.d(TAG, "listener set");
-        } else {
-            Rect rect = new Rect();
-            getWindow().getDecorView().getWindowVisibleDisplayFrame(rect);
-            Log.d(TAG, "legacy: visibleDisplayFrame top=" + rect.top);
-            webView.setPadding(0, rect.top, 0, 0);
-        }
-    }
 
-    @Override
-    public void onWindowFocusChanged(boolean hasFocus) {
-        super.onWindowFocusChanged(hasFocus);
-        Log.d(TAG, "onWindowFocusChanged focus=" + hasFocus);
-        if (hasFocus) {
-            setupWindow();
+            return insets;
+        });
+
+        WindowInsetsControllerCompat controller = WindowCompat.getInsetsController(getWindow(), getWindow().getDecorView());
+        if (controller != null) {
+            controller.setAppearanceLightStatusBars(true);
+            Log.d(TAG, "controller setAppearanceLightStatusBars true");
         }
     }
 
