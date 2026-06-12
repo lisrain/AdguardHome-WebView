@@ -22,6 +22,9 @@ public class MainActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        webView = new WebView(this);
+        setContentView(webView);
+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
             getWindow().setDecorFitsSystemWindows(false);
             WindowInsetsController controller = getWindow().getInsetsController();
@@ -32,9 +35,6 @@ public class MainActivity extends Activity {
         } else {
             hideSystemUI();
         }
-
-        webView = new WebView(this);
-        setContentView(webView);
 
         WebSettings settings = webView.getSettings();
         settings.setJavaScriptEnabled(true);
