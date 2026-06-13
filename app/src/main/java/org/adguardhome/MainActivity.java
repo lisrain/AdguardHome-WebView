@@ -118,8 +118,25 @@ public class MainActivity extends AppCompatActivity {
                     return;
                 }
 
-                isNavigatingBack = true;
                 String prevUrl = historyStack.remove(historyStack.size() - 1);
+                String currentUrl = webView.getUrl();
+
+                if (currentUrl != null) {
+                    String currentBase = getBaseUrl(currentUrl);
+                    String prevBase = getBaseUrl(prevUrl);
+                    String prevHash = getHash(prevUrl);
+
+                    if (currentBase.equals(prevBase) && prevHash != null) {
+                        isNavigatingBack = true;
+                        webView.evaluateJavascript(
+                            "window.location.hash = '" + prevHash + "'",
+                            null
+                        );
+                        return;
+                    }
+                }
+
+                isNavigatingBack = true;
                 webView.loadUrl(prevUrl);
             }
         };
@@ -161,6 +178,16 @@ public class MainActivity extends AppCompatActivity {
                 historyStack.add(url);
             }
         });
+    }
+
+    private String getBaseUrl(String url) {
+        int hashIndex = url.indexOf("#");
+        return hashIndex >= 0 ? url.substring(0, hashIndex) : url;
+    }
+
+    private String getHash(String url) {
+        int hashIndex = url.indexOf("#");
+        return hashIndex >= 0 ? url.substring(hashIndex + 1) : null;
     }
 
     @Override
