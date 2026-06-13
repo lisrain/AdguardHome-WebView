@@ -116,6 +116,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void handleOnBackPressed() {
                 webView.goBack();
+                backCallback.setEnabled(webView.canGoBack());
             }
         };
         getOnBackPressedDispatcher().addCallback(this, backCallback);
