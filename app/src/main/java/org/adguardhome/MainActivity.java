@@ -10,6 +10,7 @@ import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
 import androidx.activity.EdgeToEdge;
+import androidx.activity.OnBackPressedCallback;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
@@ -40,6 +41,7 @@ public class MainActivity extends AppCompatActivity {
         setupSystemBars();
         setupWebView();
         setupSwipeRefresh();
+        setupBackCallback();
 
         webView.loadUrl(TARGET_URL);
     }
@@ -114,13 +116,18 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    @Override
-    public void onBackPressed() {
-        if (webView.canGoBack()) {
-            webView.goBack();
-        } else {
-            finish();
-        }
+    private void setupBackCallback() {
+        getOnBackPressedDispatcher().addCallback(this, new OnBackPressedCallback(true) {
+            @Override
+            public void handleOnBackPressed() {
+                if (webView.canGoBack()) {
+                    webView.goBack();
+                } else {
+                    setEnabled(false);
+                    getOnBackPressedDispatcher().onBackPressed();
+                }
+            }
+        });
     }
 
     @Override
