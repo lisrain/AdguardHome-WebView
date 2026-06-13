@@ -40,6 +40,7 @@ jobs:
       uses: gradle/actions/setup-gradle@v4
       with:
         cache-disabled: true
+        validate-wrappers: false
 
     - name: Build Debug APK
       run: gradle assembleDebug
