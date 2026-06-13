@@ -19,13 +19,19 @@ import androidx.core.view.WindowInsetsCompat;
 import androidx.core.view.WindowInsetsControllerCompat;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class MainActivity extends AppCompatActivity {
     private WebView webView;
     private SwipeRefreshLayout swipeRefresh;
-    private OnBackPressedCallback backCallback;
     private View statusBarPlaceholder;
+    private final List<String> historyStack = new ArrayList<>();
+    private boolean isLoginTransition = false;
+    private boolean isNavigatingBack = false;
 
     private static final String TARGET_URL = "http://127.0.0.1:3000";
+    private static final String LOGIN_PAGE = "/login.html";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,14 +51,6 @@ public class MainActivity extends AppCompatActivity {
         setupBackCallback();
 
         webView.loadUrl(TARGET_URL);
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-        if (backCallback != null && webView != null) {
-            backCallback.setEnabled(webView.canGoBack());
-        }
     }
 
     private void setupSystemBars() {
@@ -112,11 +110,17 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void setupBackCallback() {
-        backCallback = new OnBackPressedCallback(false) {
+        OnBackPressedCallback backCallback = new OnBackPressedCallback(true) {
             @Override
             public void handleOnBackPressed() {
-                webView.goBack();
-                backCallback.setEnabled(webView.canGoBack());
+                if (historyStack.isEmpty()) {
+                    finish();
+                    return;
+                }
+
+                isNavigatingBack = true;
+                String prevUrl = historyStack.remove(historyStack.size() - 1);
+                webView.loadUrl(prevUrl);
             }
         };
         getOnBackPressedDispatcher().addCallback(this, backCallback);
@@ -132,7 +136,29 @@ public class MainActivity extends AppCompatActivity {
             public void onPageFinished(WebView view, String url) {
                 super.onPageFinished(view, url);
                 swipeRefresh.setRefreshing(false);
-                backCallback.setEnabled(webView.canGoBack());
+
+                if (isNavigatingBack) {
+                    isNavigatingBack = false;
+                    return;
+                }
+
+                if (url.contains(LOGIN_PAGE)) {
+                    historyStack.clear();
+                    isLoginTransition = true;
+                    return;
+                }
+
+                if (isLoginTransition) {
+                    historyStack.clear();
+                    isLoginTransition = false;
+                    return;
+                }
+
+                if (!historyStack.isEmpty() && historyStack.get(historyStack.size() - 1).equals(url)) {
+                    return;
+                }
+
+                historyStack.add(url);
             }
         });
     }
