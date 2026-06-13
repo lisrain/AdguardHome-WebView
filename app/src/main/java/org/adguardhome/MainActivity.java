@@ -90,7 +90,12 @@ public class MainActivity extends AppCompatActivity {
         }
 
         webView.setWebChromeClient(new WebChromeClient());
-        webView.setWebViewClient(new WebViewClient());
+        webView.setWebViewClient(new WebViewClient() {
+            @Override
+            public void onPageFinished(WebView view, String url) {
+                swipeRefresh.setRefreshing(false);
+            }
+        });
     }
 
     private void setupSwipeRefresh() {
