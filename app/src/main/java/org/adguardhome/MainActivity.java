@@ -16,9 +16,11 @@ import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowCompat;
 import androidx.core.view.WindowInsetsCompat;
 import androidx.core.view.WindowInsetsControllerCompat;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 public class MainActivity extends AppCompatActivity {
     private WebView webView;
+    private SwipeRefreshLayout swipeRefresh;
     private View statusBarPlaceholder;
 
     private static final String TARGET_URL = "http://127.0.0.1:3000";
@@ -32,10 +34,12 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         statusBarPlaceholder = findViewById(R.id.statusBarPlaceholder);
+        swipeRefresh = findViewById(R.id.swipeRefresh);
         webView = findViewById(R.id.webview);
 
         setupSystemBars();
         setupWebView();
+        setupSwipeRefresh();
 
         webView.loadUrl(TARGET_URL);
     }
@@ -80,15 +84,34 @@ public class MainActivity extends AppCompatActivity {
             settings.setForceDark(isDarkMode ? WebSettings.FORCE_DARK_ON : WebSettings.FORCE_DARK_AUTO);
         }
 
+        webView.setWebChromeClient(new WebChromeClient());
+    }
+
+    private void setupSwipeRefresh() {
+        swipeRefresh.setColorSchemeResources(
+            R.color.swipe_refresh_color_1,
+            R.color.swipe_refresh_color_2,
+            R.color.swipe_refresh_color_3,
+            R.color.swipe_refresh_color_4
+        );
+
+        swipeRefresh.setOnRefreshListener(() -> {
+            webView.reload();
+        });
+
         webView.setWebViewClient(new WebViewClient() {
             @Override
             public boolean shouldOverrideUrlLoading(WebView view, String url) {
                 view.loadUrl(url);
                 return true;
             }
-        });
 
-        webView.setWebChromeClient(new WebChromeClient());
+            @Override
+            public void onPageFinished(WebView view, String url) {
+                super.onPageFinished(view, url);
+                swipeRefresh.setRefreshing(false);
+            }
+        });
     }
 
     @Override
