@@ -3,6 +3,8 @@ package org.adguardhome;
 import android.content.res.Configuration;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.view.View;
 import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
@@ -22,8 +24,11 @@ public class MainActivity extends AppCompatActivity {
     private WebView webView;
     private SwipeRefreshLayout swipeRefresh;
     private View statusBarPlaceholder;
+    private final Handler refreshHandler = new Handler(Looper.getMainLooper());
+    private boolean isRefreshing = false;
 
     private static final String TARGET_URL = "http://127.0.0.1:3000";
+    private static final long REFRESH_TIMEOUT_MS = 8000;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -92,8 +97,16 @@ public class MainActivity extends AppCompatActivity {
         webView.setWebChromeClient(new WebChromeClient());
         webView.setWebViewClient(new WebViewClient() {
             @Override
+            public void onPageStarted(WebView view, String url, android.graphics.Bitmap favicon) {
+                if (!isRefreshing) {
+                    return;
+                }
+                refreshHandler.postDelayed(() -> stopRefreshing(), REFRESH_TIMEOUT_MS);
+            }
+
+            @Override
             public void onPageFinished(WebView view, String url) {
-                swipeRefresh.setRefreshing(false);
+                stopRefreshing();
             }
         });
     }
@@ -107,12 +120,20 @@ public class MainActivity extends AppCompatActivity {
         );
 
         swipeRefresh.setOnRefreshListener(() -> {
+            isRefreshing = true;
             webView.reload();
         });
     }
 
+    private void stopRefreshing() {
+        refreshHandler.removeCallbacksAndMessages(null);
+        isRefreshing = false;
+        swipeRefresh.setRefreshing(false);
+    }
+
     @Override
     protected void onDestroy() {
+        refreshHandler.removeCallbacksAndMessages(null);
         if (webView != null) {
             webView.destroy();
         }
