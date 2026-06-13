@@ -118,14 +118,6 @@ public class MainActivity extends AppCompatActivity {
                     return;
                 }
 
-                String prevUrl = historyStack.remove(historyStack.size() - 1);
-
-                if (isDashboardUrl(prevUrl)) {
-                    historyStack.clear();
-                    finish();
-                    return;
-                }
-
                 webView.evaluateJavascript("history.back()", null);
             }
         };
@@ -152,6 +144,11 @@ public class MainActivity extends AppCompatActivity {
                 if (isLoginTransition) {
                     historyStack.clear();
                     isLoginTransition = false;
+                    return;
+                }
+
+                if (isDashboardUrl(url)) {
+                    historyStack.clear();
                     return;
                 }
 
