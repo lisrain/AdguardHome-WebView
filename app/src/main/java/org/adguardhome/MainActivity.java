@@ -22,6 +22,7 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 public class MainActivity extends AppCompatActivity {
     private WebView webView;
     private SwipeRefreshLayout swipeRefresh;
+    private OnBackPressedCallback backCallback;
     private View statusBarPlaceholder;
 
     private static final String TARGET_URL = "http://127.0.0.1:3000";
@@ -44,6 +45,14 @@ public class MainActivity extends AppCompatActivity {
         setupBackCallback();
 
         webView.loadUrl(TARGET_URL);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if (backCallback != null && webView != null) {
+            backCallback.setEnabled(webView.canGoBack());
+        }
     }
 
     private void setupSystemBars() {
@@ -100,6 +109,16 @@ public class MainActivity extends AppCompatActivity {
         swipeRefresh.setOnRefreshListener(() -> {
             webView.reload();
         });
+    }
+
+    private void setupBackCallback() {
+        backCallback = new OnBackPressedCallback(false) {
+            @Override
+            public void handleOnBackPressed() {
+                webView.goBack();
+            }
+        };
+        getOnBackPressedDispatcher().addCallback(this, backCallback);
 
         webView.setWebViewClient(new WebViewClient() {
             @Override
@@ -112,20 +131,7 @@ public class MainActivity extends AppCompatActivity {
             public void onPageFinished(WebView view, String url) {
                 super.onPageFinished(view, url);
                 swipeRefresh.setRefreshing(false);
-            }
-        });
-    }
-
-    private void setupBackCallback() {
-        getOnBackPressedDispatcher().addCallback(this, new OnBackPressedCallback(true) {
-            @Override
-            public void handleOnBackPressed() {
-                if (webView.canGoBack()) {
-                    webView.goBack();
-                } else {
-                    setEnabled(false);
-                    getOnBackPressedDispatcher().onBackPressed();
-                }
+                backCallback.setEnabled(webView.canGoBack());
             }
         });
     }
