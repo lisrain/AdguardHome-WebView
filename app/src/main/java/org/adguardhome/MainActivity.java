@@ -28,7 +28,6 @@ public class MainActivity extends AppCompatActivity {
     private View statusBarPlaceholder;
     private final List<String> historyStack = new ArrayList<>();
     private boolean isLoginTransition = false;
-    private boolean isNavigatingBack = false;
 
     private static final String TARGET_URL = "http://127.0.0.1:3000";
     private static final String LOGIN_PAGE = "/login.html";
@@ -118,26 +117,8 @@ public class MainActivity extends AppCompatActivity {
                     return;
                 }
 
-                String prevUrl = historyStack.remove(historyStack.size() - 1);
-                String currentUrl = webView.getUrl();
-
-                if (currentUrl != null) {
-                    String currentBase = getBaseUrl(currentUrl);
-                    String prevBase = getBaseUrl(prevUrl);
-                    String prevHash = getHash(prevUrl);
-
-                    if (currentBase.equals(prevBase) && prevHash != null) {
-                        isNavigatingBack = true;
-                        webView.evaluateJavascript(
-                            "window.location.hash = '" + prevHash + "'",
-                            null
-                        );
-                        return;
-                    }
-                }
-
-                isNavigatingBack = true;
-                webView.loadUrl(prevUrl);
+                historyStack.remove(historyStack.size() - 1);
+                webView.evaluateJavascript("history.back()", null);
             }
         };
         getOnBackPressedDispatcher().addCallback(this, backCallback);
@@ -153,11 +134,6 @@ public class MainActivity extends AppCompatActivity {
             public void onPageFinished(WebView view, String url) {
                 super.onPageFinished(view, url);
                 swipeRefresh.setRefreshing(false);
-
-                if (isNavigatingBack) {
-                    isNavigatingBack = false;
-                    return;
-                }
 
                 if (url.contains(LOGIN_PAGE)) {
                     historyStack.clear();
@@ -178,16 +154,6 @@ public class MainActivity extends AppCompatActivity {
                 historyStack.add(url);
             }
         });
-    }
-
-    private String getBaseUrl(String url) {
-        int hashIndex = url.indexOf("#");
-        return hashIndex >= 0 ? url.substring(0, hashIndex) : url;
-    }
-
-    private String getHash(String url) {
-        int hashIndex = url.indexOf("#");
-        return hashIndex >= 0 ? url.substring(hashIndex + 1) : null;
     }
 
     @Override
