@@ -3,8 +3,24 @@ name: Build APK
 on:
   push:
     branches: [ main, master ]
+    paths:
+      - 'app/**'
+      - 'gradle/**'
+      - 'build.gradle'
+      - 'settings.gradle'
+      - 'gradle.properties'
+      - 'gradlew'
+      - 'gradlew.bat'
   pull_request:
     branches: [ main, master ]
+    paths:
+      - 'app/**'
+      - 'gradle/**'
+      - 'build.gradle'
+      - 'settings.gradle'
+      - 'gradle.properties'
+      - 'gradlew'
+      - 'gradlew.bat'
 
 env:
   ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION: true

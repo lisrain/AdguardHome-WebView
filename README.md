@@ -2,6 +2,8 @@
 
 一个简单的Android应用，启动后全屏打开Adguard Home管理界面。
 
+> 本项目全程由AI自动化Vibe Coding开发完成，使用GitHub Actions自动构建APK。如有Bug或建议，欢迎反馈！
+
 ## 功能特点
 
 - 启动后全屏显示
@@ -9,6 +11,7 @@
 - 沉浸式导航栏（小白条导航栏沉浸）
 - 支持Android 7.0 (API 24) 及以上版本
 - 使用GitHub Actions自动构建APK
+- 自动化CI/CD流程，仅在源码更新时触发构建
 
 ## 项目结构
 
@@ -25,7 +28,7 @@ webview-app/
 │   │   │   ├── mipmap-*/          # 应用图标
 │   │   │   └── values/
 │   │   │       ├── strings.xml    # 字符串资源
-│   │   │       └── styles.xml     # 样式资源
+│   │   │       └── themes.xml     # 主题资源
 │   │   └── AndroidManifest.xml    # 应用配置
 │   └── build.gradle               # 模块构建配置
 ├── gradle/wrapper/                # Gradle包装器
@@ -94,8 +97,13 @@ private static final String TARGET_URL = "http://127.0.0.1:3000";
 | 应用名称 | Adguard Home |
 | 包名 | org.adguardhome |
 | 最低支持版本 | Android 7.0 (API 24) |
-| 目标版本 | Android 14 (API 37) |
-| 编译版本 | Android 14 (API 37) |
+| 目标版本 | Android 16 (API 36) |
+| 编译版本 | Android 16 (API 36) |
+| 版本号 | 1.0 |
+| 版本名称 | 1.0 |
+| Gradle版本 | 8.13 |
+| AGP版本 | 8.12.0 |
+| 16KB页面大小支持 | 已适配 |
 
 ## 技术细节
 
@@ -138,6 +146,12 @@ A: 检查以下几点：
 2. 检查工作流文件语法
 3. 查看构建日志中的错误信息
 
+### Q: 为什么只有源码更新时才会触发构建？
+A: 为了节省GitHub Actions运行时间，我们配置了工作流仅在源码文件（app/、gradle/、build.gradle等）更新时触发。README或文档更新不会触发构建。
+
+### Q: 如何反馈Bug或建议？
+A: 请在GitHub Issues中提交反馈，我们会及时处理。
+
 ## 许可证
 
-本项目仅用于学习和测试目的。
+本项目仅用于学习和测试目的。由AI自动化开发，欢迎Star和Fork！
