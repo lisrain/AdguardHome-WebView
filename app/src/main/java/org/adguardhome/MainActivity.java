@@ -118,6 +118,7 @@ public class MainActivity extends AppCompatActivity {
                     return;
                 }
 
+                historyStack.remove(historyStack.size() - 1);
                 webView.evaluateJavascript("history.back()", null);
             }
         };
