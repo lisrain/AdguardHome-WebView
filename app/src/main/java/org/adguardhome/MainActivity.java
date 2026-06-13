@@ -30,6 +30,7 @@ public class MainActivity extends AppCompatActivity {
     private boolean isLoginTransition = false;
 
     private static final String TARGET_URL = "http://127.0.0.1:3000";
+    private static final String DASHBOARD_URL = TARGET_URL + "/";
     private static final String LOGIN_PAGE = "/login.html";
 
     @Override
@@ -117,7 +118,14 @@ public class MainActivity extends AppCompatActivity {
                     return;
                 }
 
-                historyStack.remove(historyStack.size() - 1);
+                String prevUrl = historyStack.remove(historyStack.size() - 1);
+
+                if (isDashboardUrl(prevUrl)) {
+                    historyStack.clear();
+                    finish();
+                    return;
+                }
+
                 webView.evaluateJavascript("history.back()", null);
             }
         };
@@ -154,6 +162,12 @@ public class MainActivity extends AppCompatActivity {
                 historyStack.add(url);
             }
         });
+    }
+
+    private boolean isDashboardUrl(String url) {
+        if (url == null) return false;
+        String baseUrl = url.contains("#") ? url.substring(0, url.indexOf("#")) : url;
+        return baseUrl.equals(TARGET_URL) || baseUrl.equals(DASHBOARD_URL);
     }
 
     @Override
